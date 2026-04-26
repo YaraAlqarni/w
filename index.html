@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Saudi Tourism Guide | دليلك السياحي</title>
+<meta name="description" content="اكتشف أهم الوجهات السياحية في المملكة العربية السعودية مع دليل سياحي تفاعلي شامل" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="style.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</head>
+<body>
+<div class="bg-decoration"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<!-- LANGUAGE BAR -->
+<div class="lang-bar">
+  <div class="lang-bar-inner" id="langBar">
+    <button class="lang-btn active" data-lang="ar">🇸🇦 العربية</button>
+    <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+    <button class="lang-btn" data-lang="zh">🇨🇳 中文</button>
+    <button class="lang-btn" data-lang="fr">🇫🇷 Français</button>
+    <button class="lang-btn" data-lang="ur">🇵🇰 اردو</button>
+    <button class="lang-btn" data-lang="ru">🇷🇺 Русский</button>
+  </div>
+</div>
+<div class="game-cta-banner">
+  <div class="game-cta-inner">
+    <span class="game-cta-text">🌿 <strong>جديد:</strong> لعبة السياحة البيئية التفاعلية — اكتشف المملكة وأجب على تحديات الاستدامة!</span>
+    <a href="game/index.html" class="game-cta-btn">🎮 العب الآن</a>
+  </div>
+</div>
+<header class="hero">
+  <nav class="topbar">
+    <div class="brand">Saudi Tourism Guide</div>
+    <div class="topbar-badge">HTML • CSS • JavaScript</div>
+  </nav>
+  <div class="hero-content container">
+    <div class="hero-text">
+      <span class="section-pill" data-t="pill"></span>
+      <h1 data-t="h1a"> <span data-t="h1b"></span></h1>
+      <p data-t="heroP"></p>
+      <div class="search-box">
+        <label for="cityInput" data-t="searchLabel"></label>
+        <div class="input-group">
+          <input id="cityInput" type="text" data-t-placeholder="searchPlaceholder" />
+          <button id="searchBtn" data-t="searchBtn"></button>
+        </div>
+        <small data-t="searchHint"></small>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <span class="stat-icon">🏙️</span>
+        <strong id="citiesCount">6</strong>
+        <span data-t="statCities"></span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">📍</span>
+        <strong id="placesCount">24</strong>
+        <span data-t="statPlaces"></span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-icon">⚡</span>
+        <strong>100%</strong>
+        <span data-t="statInteractive"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container main-content">
+  <!-- TABS -->
+  <div class="main-tabs">
+    <button class="tab-btn active" data-tab="explore" data-t="tabExplore"></button>
+    <button class="tab-btn" data-tab="map" data-t="tabMap"></button>
+    <button class="tab-btn" data-tab="favorites" data-t="tabFavorites"><span class="fav-count-badge" id="favBadge" style="display:none">0</span></button>
+  </div>
+
+  <!-- EXPLORE TAB -->
+  <div class="tab-panel active" id="tab-explore">
+    <section class="quick-cities">
+      <h2 data-t="quickCities"></h2>
+      <div class="chips" id="cityChips"></div>
+    </section>
+    <section class="results-header">
+      <div>
+        <h2 id="resultsTitle" data-t="resultsDefault"></h2>
+        <p id="resultsSubtitle" data-t="resultsHint"></p>
+      </div>
+      <div class="filter-box">
+        <label for="typeFilter" data-t="filterLabel"></label>
+        <select id="typeFilter">
+          <option value="all" data-t="filterAll"></option>
+          <option value="مشهور" data-t="filterFamous"></option>
+          <option value="جديد" data-t="filterNew"></option>
+          <option value="طبيعة" data-t="filterNature"></option>
+          <option value="تراث" data-t="filterHeritage"></option>
+          <option value="فعاليات" data-t="filterEvents"></option>
+          <option value="واجهة بحرية" data-t="filterSeafront"></option>
+        </select>
+      </div>
+    </section>
+    <section id="results" class="cards-grid"></section>
+    <section id="emptyState" class="empty-state active">
+      <div class="empty-icon">🏙️</div>
+      <h3 data-t="emptyTitle"></h3>
+      <p data-t="emptyHint"></p>
+    </section>
+  </div>
+
+  <!-- MAP TAB -->
+  <div class="tab-panel" id="tab-map">
+    <div class="map-section">
+      <div class="map-header">
+        <h2 data-t="mapTitle"></h2>
+        <p data-t="mapDesc"></p>
+      </div>
+      <div id="carbon-map"></div>
+      <div class="carbon-info-box">
+        <h4 data-t="carbonInfoTitle"></h4>
+        <p data-t="carbonInfoDesc"></p>
+      </div>
+      <div class="map-legend" id="mapLegend">
+        <strong style="color:var(--muted); font-size:0.88rem" data-t="legendTitle"></strong>
+        <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div><span data-t="legendLow"></span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#eab308"></div><span data-t="legendMed"></span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div><span data-t="legendHigh"></span></div>
+        <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div><span data-t="legendVHigh"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAVORITES TAB -->
+  <div class="tab-panel" id="tab-favorites">
+    <div id="favoritesGrid" class="cards-grid"></div>
+    <div id="favoritesEmpty" class="favorites-empty">
+      <div class="fav-empty-icon">🤍</div>
+      <h3 data-t="favEmptyTitle"></h3>
+      <p data-t="favEmptyHint"></p>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="container footer-content">
+    <p data-t="footer1"></p>
+    <p data-t="footer2"></p>
+  </div>
+</footer>
+
+<script>
+// ==================== TRANSLATIONS ====================
+const translations = {
+  ar: {
+    dir: "rtl", lang: "ar",
+    pill: "مشروع سياحي تفاعلي",
+    h1a: "اكتشف أهم المناطق السياحية في",
+    h1b: "مدن المملكة",
+    heroP: "اكتب اسم المدينة السعودية، وسيعرض لك الموقع أبرز الأماكن السياحية الجديدة والمشهورة فيها مع صورها وروابط رسمية للحجز أو التخطيط للزيارة.",
+    searchLabel: "ابحث باسم المدينة",
+    searchPlaceholder: "مثال: الرياض، جدة، العلا، أبها، الطائف، الخبر",
+    searchBtn: "بحث",
+    searchHint: "يدعم أيضًا: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar",
+    statCities: "مدن مدعومة",
+    statPlaces: "موقع سياحي",
+    statInteractive: "واجهة تفاعلية",
+    tabExplore: "استكشف",
+    tabMap: "🗺️ خريطة الكربون",
+    tabFavorites: "❤️ المفضلة",
+    quickCities: "مدن سريعة",
+    resultsDefault: "ابدأ بكتابة اسم مدينة",
+    resultsHint: "ستظهر هنا نتائج الأماكن السياحية الخاصة بالمدينة.",
+    filterLabel: "تصفية حسب النوع",
+    filterAll: "الكل",
+    filterFamous: "مشهور",
+    filterNew: "جديد",
+    filterNature: "طبيعة",
+    filterHeritage: "تراث",
+    filterEvents: "فعاليات",
+    filterSeafront: "واجهة بحرية",
+    emptyTitle: "ابحث عن مدينة من مدن المملكة",
+    emptyHint: "جرّب: الرياض، جدة، العلا، أبها، الطائف، الخبر.",
+    noCity: "المدينة غير مدعومة حاليًا",
+    noCityHint: "جرّب مدينة من المدن المتوفرة: الرياض، جدة، العلا، أبها، الطائف، الخبر.",
+    noResults: "لا توجد نتائج بهذا التصنيف داخل هذه المدينة",
+    noResultsHint: "جرّب تصنيفًا آخر أو ابحث عن مدينة مختلفة.",
+    cityFound: "تم العثور على {n} أماكن سياحية",
+    bookNow: "زيارة / حجز",
+    source: "المصدر",
+    sustainTitle: "🌱 نصائح الاستدامة البيئية",
+    mapTitle: "خريطة الأثر الكربوني للسياحة في المملكة",
+    mapDesc: "تمثيل بصري لمعدلات انبعاثات الكربون المرتبطة بالسياحة في المدن الرئيسية",
+    carbonInfoTitle: "⚠️ ما هو الأثر الكربوني للسياحة؟",
+    carbonInfoDesc: "تُنتج السياحة انبعاثات ثاني أكسيد الكربون من خلال التنقل (الطيران والسيارات)، والإقامة في الفنادق، والأنشطة الترفيهية. كلما زاد عدد الزوار وبُعد الموقع، زاد الأثر الكربوني. تساعد نصائح الاستدامة على تقليل هذا الأثر.",
+    legendTitle: "الأثر الكربوني:",
+    legendLow: "منخفض (< 1 مليون طن CO₂)",
+    legendMed: "متوسط (1-3 مليون طن CO₂)",
+    legendHigh: "مرتفع (3-6 مليون طن CO₂)",
+    legendVHigh: "مرتفع جداً (> 6 مليون طن CO₂)",
+    favEmptyTitle: "قائمة المفضلة فارغة",
+    favEmptyHint: "اضغط على ❤️ على أي مكان سياحي لإضافته هنا.",
+    footer1: "تم تطوير هذا المشروع باستخدام HTML و CSS و JavaScript.",
+    footer2: "البيانات المعروضة قابلة للتوسعة بإضافة مدن أو ربط API مستقبلاً.",
+    addFav: "أضف للمفضلة",
+    removeFav: "أزل من المفضلة",
+  },
+  en: {
+    dir: "ltr", lang: "en",
+    pill: "Interactive Tourism Project",
+    h1a: "Discover the Best Tourist Destinations in",
+    h1b: "Saudi Cities",
+    heroP: "Type a Saudi city name and the site will show you the most popular and newest tourist attractions with photos and official booking links.",
+    searchLabel: "Search by city name",
+    searchPlaceholder: "e.g.: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar",
+    searchBtn: "Search",
+    searchHint: "Also supports Arabic: الرياض، جدة، العلا، أبها، الطائف، الخبر",
+    statCities: "Supported Cities",
+    statPlaces: "Tourist Spots",
+    statInteractive: "Interactive UI",
+    tabExplore: "Explore",
+    tabMap: "🗺️ Carbon Map",
+    tabFavorites: "❤️ Favorites",
+    quickCities: "Quick Cities",
+    resultsDefault: "Start by typing a city name",
+    resultsHint: "Tourist spots for the city will appear here.",
+    filterLabel: "Filter by type",
+    filterAll: "All",
+    filterFamous: "Famous",
+    filterNew: "New",
+    filterNature: "Nature",
+    filterHeritage: "Heritage",
+    filterEvents: "Events",
+    filterSeafront: "Seafront",
+    emptyTitle: "Search for a Saudi city",
+    emptyHint: "Try: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar.",
+    noCity: "City not currently supported",
+    noCityHint: "Try one of: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar.",
+    noResults: "No results for this filter in this city",
+    noResultsHint: "Try a different filter or search another city.",
+    cityFound: "{n} tourist spots found",
+    bookNow: "Visit / Book",
+    source: "Source",
+    sustainTitle: "🌱 Sustainability Tips",
+    mapTitle: "Carbon Impact Map of Tourism in Saudi Arabia",
+    mapDesc: "A visual representation of carbon emission rates associated with tourism in major Saudi cities",
+    carbonInfoTitle: "⚠️ What is the Tourism Carbon Footprint?",
+    carbonInfoDesc: "Tourism produces CO₂ emissions through transport (flights, cars), hotel stays, and recreational activities. The more visitors and the farther the location, the higher the carbon impact. Sustainability tips help reduce this footprint.",
+    legendTitle: "Carbon Impact:",
+    legendLow: "Low (< 1M tons CO₂)",
+    legendMed: "Medium (1-3M tons CO₂)",
+    legendHigh: "High (3-6M tons CO₂)",
+    legendVHigh: "Very High (> 6M tons CO₂)",
+    favEmptyTitle: "Your favorites list is empty",
+    favEmptyHint: "Press ❤️ on any place to add it here.",
+    footer1: "This project was built using HTML, CSS and JavaScript.",
+    footer2: "Data is expandable by adding cities or connecting an API in the future.",
+    addFav: "Add to favorites",
+    removeFav: "Remove from favorites",
+  },
+  zh: {
+    dir: "ltr", lang: "zh",
+    pill: "互动旅游项目",
+    h1a: "探索沙特城市的",
+    h1b: "顶级旅游目的地",
+    heroP: "输入沙特城市名称，网站将显示最受欢迎和最新的旅游景点，并附有照片和官方预订链接。",
+    searchLabel: "按城市名称搜索",
+    searchPlaceholder: "例如：利雅得、吉达、阿尔乌拉、阿卜哈、塔伊夫、胡拜尔",
+    searchBtn: "搜索",
+    searchHint: "也支持阿拉伯语和英语",
+    statCities: "支持城市",
+    statPlaces: "旅游景点",
+    statInteractive: "互动界面",
+    tabExplore: "探索",
+    tabMap: "🗺️ 碳排放地图",
+    tabFavorites: "❤️ 收藏夹",
+    quickCities: "快速选择城市",
+    resultsDefault: "开始输入城市名称",
+    resultsHint: "该城市的旅游景点将显示在这里。",
+    filterLabel: "按类型筛选",
+    filterAll: "全部",
+    filterFamous: "著名景点",
+    filterNew: "新景点",
+    filterNature: "自然",
+    filterHeritage: "文化遗产",
+    filterEvents: "活动",
+    filterSeafront: "海滨",
+    emptyTitle: "搜索沙特城市",
+    emptyHint: "试试：利雅得、吉达、阿尔乌拉、阿卜哈、塔伊夫、胡拜尔。",
+    noCity: "目前不支持该城市",
+    noCityHint: "请尝试：利雅得、吉达、阿尔乌拉、阿卜哈、塔伊夫、胡拜尔。",
+    noResults: "此筛选条件在该城市没有结果",
+    noResultsHint: "请尝试其他筛选条件或搜索其他城市。",
+    cityFound: "找到 {n} 个旅游景点",
+    bookNow: "访问 / 预订",
+    source: "来源",
+    sustainTitle: "🌱 可持续发展建议",
+    mapTitle: "沙特阿拉伯旅游碳排放地图",
+    mapDesc: "主要沙特城市旅游业相关碳排放量的可视化展示",
+    carbonInfoTitle: "⚠️ 什么是旅游碳足迹？",
+    carbonInfoDesc: "旅游业通过交通（航班、汽车）、酒店住宿和休闲活动产生二氧化碳排放。游客越多、地点越远，碳排放影响越大。可持续发展建议有助于减少这种影响。",
+    legendTitle: "碳排放影响：",
+    legendLow: "低（< 100万吨CO₂）",
+    legendMed: "中（100-300万吨CO₂）",
+    legendHigh: "高（300-600万吨CO₂）",
+    legendVHigh: "极高（> 600万吨CO₂）",
+    favEmptyTitle: "收藏夹为空",
+    favEmptyHint: "点击任意景点上的 ❤️ 将其添加到这里。",
+    footer1: "本项目使用 HTML、CSS 和 JavaScript 构建。",
+    footer2: "数据可通过添加城市或连接 API 来扩展。",
+    addFav: "添加到收藏夹",
+    removeFav: "从收藏夹移除",
+  },
+  fr: {
+    dir: "ltr", lang: "fr",
+    pill: "Projet Touristique Interactif",
+    h1a: "Découvrez les meilleures destinations touristiques dans",
+    h1b: "les villes d'Arabie Saoudite",
+    heroP: "Saisissez le nom d'une ville saoudienne et le site affichera les attractions touristiques les plus populaires et les plus récentes avec photos et liens de réservation officiels.",
+    searchLabel: "Rechercher par nom de ville",
+    searchPlaceholder: "Ex: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar",
+    searchBtn: "Rechercher",
+    searchHint: "Supporte aussi l'arabe et l'anglais",
+    statCities: "Villes Supportées",
+    statPlaces: "Sites Touristiques",
+    statInteractive: "Interface Interactive",
+    tabExplore: "Explorer",
+    tabMap: "🗺️ Carte Carbone",
+    tabFavorites: "❤️ Favoris",
+    quickCities: "Villes Rapides",
+    resultsDefault: "Commencez par taper un nom de ville",
+    resultsHint: "Les sites touristiques de la ville apparaîtront ici.",
+    filterLabel: "Filtrer par type",
+    filterAll: "Tous",
+    filterFamous: "Célèbre",
+    filterNew: "Nouveau",
+    filterNature: "Nature",
+    filterHeritage: "Patrimoine",
+    filterEvents: "Événements",
+    filterSeafront: "Front de Mer",
+    emptyTitle: "Recherchez une ville saoudienne",
+    emptyHint: "Essayez: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar.",
+    noCity: "Ville non supportée actuellement",
+    noCityHint: "Essayez l'une des villes disponibles: Riyadh, Jeddah, AlUla, Abha, Taif, Khobar.",
+    noResults: "Pas de résultats pour ce filtre dans cette ville",
+    noResultsHint: "Essayez un autre filtre ou cherchez une autre ville.",
+    cityFound: "{n} sites touristiques trouvés",
+    bookNow: "Visiter / Réserver",
+    source: "Source",
+    sustainTitle: "🌱 Conseils de Durabilité",
+    mapTitle: "Carte d'Impact Carbone du Tourisme en Arabie Saoudite",
+    mapDesc: "Représentation visuelle des taux d'émissions de CO₂ liés au tourisme dans les principales villes saoudiennes",
+    carbonInfoTitle: "⚠️ Qu'est-ce que l'empreinte carbone touristique?",
+    carbonInfoDesc: "Le tourisme produit des émissions de CO₂ via le transport (vols, voitures), les séjours hôteliers et les activités récréatives. Plus il y a de visiteurs et plus le site est éloigné, plus l'impact carbone est élevé. Les conseils de durabilité aident à réduire cet impact.",
+    legendTitle: "Impact Carbone:",
+    legendLow: "Faible (< 1M tonnes CO₂)",
+    legendMed: "Moyen (1-3M tonnes CO₂)",
+    legendHigh: "Élevé (3-6M tonnes CO₂)",
+    legendVHigh: "Très Élevé (> 6M tonnes CO₂)",
+    favEmptyTitle: "Votre liste de favoris est vide",
+    favEmptyHint: "Appuyez sur ❤️ sur n'importe quel site pour l'ajouter ici.",
+    footer1: "Ce projet a été développé en utilisant HTML, CSS et JavaScript.",
+    footer2: "Les données sont extensibles en ajoutant des villes ou en connectant une API.",
+    addFav: "Ajouter aux favoris",
+    removeFav: "Retirer des favoris",
+  },
+  ur: {
+    dir: "rtl", lang: "ur",
+    pill: "انٹرایکٹو سیاحتی منصوبہ",
+    h1a: "سعودی شہروں میں بہترین سیاحتی مقامات دریافت کریں",
+    h1b: "",
+    heroP: "سعودی شہر کا نام ٹائپ کریں اور ویب سائٹ آپ کو تصاویر اور سرکاری بکنگ لنکس کے ساتھ مشہور اور نئے سیاحتی مقامات دکھائے گی۔",
+    searchLabel: "شہر کے نام سے تلاش کریں",
+    searchPlaceholder: "مثال: ریاض، جدہ، العلا، ابہا، طائف، خبر",
+    searchBtn: "تلاش",
+    searchHint: "انگریزی اور عربی میں بھی سپورٹ کرتا ہے",
+    statCities: "معاون شہر",
+    statPlaces: "سیاحتی مقام",
+    statInteractive: "انٹرایکٹو انٹرفیس",
+    tabExplore: "دریافت کریں",
+    tabMap: "🗺️ کاربن نقشہ",
+    tabFavorites: "❤️ پسندیدہ",
+    quickCities: "فوری شہر",
+    resultsDefault: "شہر کا نام ٹائپ کرکے شروع کریں",
+    resultsHint: "شہر کے سیاحتی مقامات یہاں ظاہر ہوں گے۔",
+    filterLabel: "قسم کے مطابق فلٹر کریں",
+    filterAll: "سب",
+    filterFamous: "مشہور",
+    filterNew: "نیا",
+    filterNature: "فطرت",
+    filterHeritage: "ورثہ",
+    filterEvents: "تقریبات",
+    filterSeafront: "سمندری کنارہ",
+    emptyTitle: "سعودی شہر تلاش کریں",
+    emptyHint: "آزمائیں: ریاض، جدہ، العلا، ابہا، طائف، خبر۔",
+    noCity: "یہ شہر ابھی سپورٹ نہیں ہے",
+    noCityHint: "براہ کرم کوئی دستیاب شہر آزمائیں۔",
+    noResults: "اس فلٹر میں اس شہر میں کوئی نتیجہ نہیں",
+    noResultsHint: "کوئی اور فلٹر یا شہر آزمائیں۔",
+    cityFound: "{n} سیاحتی مقامات ملے",
+    bookNow: "ملاحظہ / بکنگ",
+    source: "ماخذ",
+    sustainTitle: "🌱 پائیداری کی تجاویز",
+    mapTitle: "سعودی عرب میں سیاحت کا کاربن اثر نقشہ",
+    mapDesc: "بڑے سعودی شہروں میں سیاحت سے متعلق کاربن اخراج کی بصری نمائندگی",
+    carbonInfoTitle: "⚠️ سیاحت کا کاربن فٹ پرنٹ کیا ہے؟",
+    carbonInfoDesc: "سیاحت نقل و حمل، ہوٹل قیام اور تفریحی سرگرمیوں کے ذریعے CO₂ اخراج پیدا کرتی ہے۔ پائیداری کی تجاویز اس اثر کو کم کرنے میں مدد دیتی ہیں۔",
+    legendTitle: "کاربن اثر:",
+    legendLow: "کم",
+    legendMed: "درمیانہ",
+    legendHigh: "زیادہ",
+    legendVHigh: "بہت زیادہ",
+    favEmptyTitle: "پسندیدہ فہرست خالی ہے",
+    favEmptyHint: "کسی بھی مقام پر ❤️ دبائیں تاکہ اسے یہاں شامل کریں۔",
+    footer1: "یہ منصوبہ HTML، CSS اور JavaScript کا استعمال کرکے بنایا گیا۔",
+    footer2: "مستقبل میں شہر شامل کرکے یا API سے جوڑ کر ڈیٹا بڑھایا جا سکتا ہے۔",
+    addFav: "پسندیدہ میں شامل کریں",
+    removeFav: "پسندیدہ سے ہٹائیں",
+  },
+  ru: {
+    dir: "ltr", lang: "ru",
+    pill: "Интерактивный туристический проект",
+    h1a: "Откройте для себя лучшие туристические направления в",
+    h1b: "городах Саудовской Аравии",
+    heroP: "Введите название саудовского города, и сайт покажет вам самые популярные и новые туристические достопримечательности с фотографиями и официальными ссылками для бронирования.",
+    searchLabel: "Поиск по названию города",
+    searchPlaceholder: "Например: Эр-Рияд, Джедда, АльУла, Абха, Таиф, Хубар",
+    searchBtn: "Поиск",
+    searchHint: "Также поддерживает арабский и английский",
+    statCities: "Поддерживаемые города",
+    statPlaces: "Туристические места",
+    statInteractive: "Интерактивный интерфейс",
+    tabExplore: "Исследовать",
+    tabMap: "🗺️ Карта углерода",
+    tabFavorites: "❤️ Избранное",
+    quickCities: "Быстрый выбор города",
+    resultsDefault: "Начните вводить название города",
+    resultsHint: "Туристические места города появятся здесь.",
+    filterLabel: "Фильтр по типу",
+    filterAll: "Все",
+    filterFamous: "Известные",
+    filterNew: "Новые",
+    filterNature: "Природа",
+    filterHeritage: "Наследие",
+    filterEvents: "Мероприятия",
+    filterSeafront: "Набережная",
+    emptyTitle: "Найдите саудовский город",
+    emptyHint: "Попробуйте: Эр-Рияд, Джедда, АльУла, Абха, Таиф, Хубар.",
+    noCity: "Город пока не поддерживается",
+    noCityHint: "Попробуйте один из доступных городов: Эр-Рияд, Джедда, АльУла, Абха, Таиф, Хубар.",
+    noResults: "Нет результатов для этого фильтра в данном городе",
+    noResultsHint: "Попробуйте другой фильтр или найдите другой город.",
+    cityFound: "Найдено {n} туристических мест",
+    bookNow: "Посетить / Забронировать",
+    source: "Источник",
+    sustainTitle: "🌱 Советы по устойчивому туризму",
+    mapTitle: "Карта углеродного воздействия туризма в Саудовской Аравии",
+    mapDesc: "Визуальное представление уровней выбросов CO₂, связанных с туризмом в крупных городах Саудовской Аравии",
+    carbonInfoTitle: "⚠️ Что такое углеродный след туризма?",
+    carbonInfoDesc: "Туризм производит выбросы CO₂ через транспорт (перелёты, автомобили), проживание в отелях и развлекательные мероприятия. Советы по устойчивому туризму помогают снизить этот след.",
+    legendTitle: "Углеродное воздействие:",
+    legendLow: "Низкое (< 1М тонн CO₂)",
+    legendMed: "Среднее (1-3М тонн CO₂)",
+    legendHigh: "Высокое (3-6М тонн CO₂)",
+    legendVHigh: "Очень высокое (> 6М тонн CO₂)",
+    favEmptyTitle: "Список избранного пуст",
+    favEmptyHint: "Нажмите ❤️ на любом месте, чтобы добавить его сюда.",
+    footer1: "Этот проект разработан с использованием HTML, CSS и JavaScript.",
+    footer2: "Данные можно расширить, добавив города или подключив API.",
+    addFav: "Добавить в избранное",
+    removeFav: "Удалить из избранного",
+  }
+};
+
+// ==================== TOURISM DATA ====================
+const tourismData = {
+  riyadh: {
+    cityAr: "الرياض", cityEn: "Riyadh",
+    places: [
+      { id: "riyadh_1", name: "الدرعية - حي الطريف", nameEn: "Diriyah - Al-Turaif", type: "تراث", description: "وجهة تاريخية مسجلة في اليونسكو وتُعد من أبرز معالم الرياض لمحبي التراث والثقافة السعودية.", descriptionEn: "A UNESCO-listed historic destination, one of Riyadh's most prominent landmarks for heritage and Saudi culture lovers.", image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/riyadh", source: "Visit Saudi", sustainabilityTips: ["حافظ على نظافة الموقع التراثي ولا تترك أي مخلفات خلفك.", "التزم بالمسارات المحددة لحماية المباني التاريخية والمناطق الحساسة.", "ادعم المتاجر والمنتجات المحلية لتعزيز السياحة المستدامة في المدينة."] },
+      { id: "riyadh_2", name: "بوليفارد رياض سيتي", nameEn: "Boulevard Riyadh City", type: "مشهور", description: "من أشهر مناطق الترفيه في الرياض، ويضم مطاعم وتجارب وأنشطة وفعاليات موسمية متنوعة.", descriptionEn: "One of Riyadh's most famous entertainment zones, featuring restaurants, activities, and seasonal events.", image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/seasons/riyadh-season", source: "Visit Saudi", sustainabilityTips: ["استخدم المواصلات المشتركة أو العامة لتخفيف الازدحام والانبعاثات.", "قلل من استخدام البلاستيك أحادي الاستخدام أثناء زيارتك.", "تخلّص من النفايات في الأماكن المخصصة وحافظ على نظافة المنطقة."] },
+      { id: "riyadh_3", name: "فعاليات موسم الرياض", nameEn: "Riyadh Season Events", type: "جديد", description: "فعاليات وتجارب حديثة ومتجددة باستمرار تشمل عروضًا ومناطق ترفيهية وتجارب عالمية.", descriptionEn: "Constantly renewed modern events and experiences including shows, entertainment zones, and world-class experiences.", image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/seasons/riyadh-season", source: "Visit Saudi", sustainabilityTips: ["استخدم التذاكر الإلكترونية والخرائط الرقمية بدل المطبوعات.", "شارك السيارة أو استخدم النقل العام لتخفيف الازدحام.", "ارمِ النفايات في الأماكن المخصصة وحافظ على نظافة الفعالية."] },
+      { id: "riyadh_4", name: "Edge of the World", nameEn: "Edge of the World", type: "طبيعة", description: "أحد أشهر المواقع الطبيعية القريبة من الرياض بإطلالات صخرية مدهشة وتجربة مثالية لعشاق المغامرة.", descriptionEn: "One of the most famous natural sites near Riyadh with stunning rocky views, ideal for adventure lovers.", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://book.visitsaudi.com/product/31d59430-50a6-48ee-b041-90590277e5ce?locale=en", source: "Visit Saudi Booking", sustainabilityTips: ["احرص على عدم العبث بالتكوينات الصخرية أو الكتابة عليها.", "خذ معك عبوة ماء قابلة لإعادة الاستخدام لتقليل النفايات.", "اتبع تعليمات السلامة والمسارات المخصصة لحماية البيئة الصحراوية."] }
+    ]
+  },
+  jeddah: {
+    cityAr: "جدة", cityEn: "Jeddah",
+    places: [
+      { id: "jeddah_1", name: "البلد التاريخية", nameEn: "Al-Balad Historic District", type: "تراث", description: "من أشهر مناطق جدة التاريخية، تتميز بالأزقة القديمة والأسواق التراثية والمباني الحجازية العريقة.", descriptionEn: "One of Jeddah's most famous historic areas, known for its old alleys, heritage markets, and ancient Hejazi architecture.", image: "https://images.unsplash.com/photo-1526481280695-3c4691f7f8c3?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/jeddah", source: "Visit Saudi", sustainabilityTips: ["احترم المباني التاريخية ولا تلمس العناصر الأثرية أو تتلفها.", "تسوق من الحرفيين المحليين لدعم الاقتصاد المحلي بشكل مستدام.", "خفف من استخدام المواد البلاستيكية أثناء الجولة داخل المنطقة."] },
+      { id: "jeddah_2", name: "كورنيش جدة", nameEn: "Jeddah Corniche", type: "واجهة بحرية", description: "واجهة بحرية شهيرة توفر إطلالات على البحر الأحمر وممرات للمشي ومناطق عائلية وفنية.", descriptionEn: "A famous seafront offering Red Sea views, walking paths, family zones, and art spaces.", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/jeddah/attractions/jeddah-corniche", source: "Visit Saudi", sustainabilityTips: ["حافظ على نظافة الواجهة البحرية ولا تترك أي مخلفات على الساحل.", "استخدم زجاجة ماء قابلة لإعادة الاستخدام بدل العبوات البلاستيكية.", "تجنب إزعاج الحياة البحرية واحترم المساحات العامة."] },
+      { id: "jeddah_3", name: "جدة آرت بروميناد", nameEn: "Jeddah Art Promenade", type: "جديد", description: "من الواجهات الحديثة والمميزة في جدة، وتناسب التنزه والتصوير والاستمتاع بالأجواء البحرية.", descriptionEn: "One of Jeddah's modern and distinctive promenades, great for strolling, photography, and enjoying the seaside.", image: "https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/jeddah/attractions/jeddah-art-promenade", source: "Visit Saudi", sustainabilityTips: ["استفد من المشي داخل المنطقة لتقليل استخدام السيارة لمسافات قصيرة.", "ارمِ النفايات في الحاويات المخصصة وحافظ على الواجهة البحرية نظيفة.", "ادعم المقاهي والمشاريع المحلية الصديقة للبيئة متى أمكن."] },
+      { id: "jeddah_4", name: "موسم جدة", nameEn: "Jeddah Season", type: "فعاليات", description: "موسم ترفيهي حديث يضم حفلات وتجارب بحرية وعروضًا وأنشطة عائلية متنوعة.", descriptionEn: "A modern entertainment season featuring concerts, marine experiences, shows, and diverse family activities.", image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/seasons/jeddah-season", source: "Visit Saudi", sustainabilityTips: ["اختر التذاكر والخدمات الرقمية لتقليل استهلاك الورق.", "استخدم النقل الجماعي أو شارك الرحلة مع الآخرين عند حضور الفعاليات.", "التزم بتعليمات إدارة الفعالية الخاصة بالنظافة وفرز النفايات."] }
+    ]
+  },
+  alula: {
+    cityAr: "العلا", cityEn: "AlUla",
+    places: [
+      { id: "alula_1", name: "الحِجر", nameEn: "Hegra (Al-Hijr)", type: "تراث", description: "موقع تاريخي عالمي ومدرج ضمن اليونسكو، ويُعد من أهم الوجهات السياحية في المملكة.", descriptionEn: "A UNESCO world heritage site, considered one of Saudi Arabia's most important tourist destinations.", image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/alula", source: "Visit Saudi", sustainabilityTips: ["لا تقترب من النقوش الأثرية أو تلمسها للحفاظ عليها للأجيال القادمة.", "التزم بالجولات والمسارات المحددة لتقليل التأثير على الموقع التاريخي.", "احمل معك مخلفاتك الشخصية ولا تترك أي أثر في المكان."] },
+      { id: "alula_2", name: "صخرة الفيل", nameEn: "Elephant Rock", type: "مشهور", description: "تشكّل صخري طبيعي شهير جدًا في العلا، ويُعد من أكثر الأماكن جذبًا للزوار والتصوير.", descriptionEn: "A very famous natural rock formation in AlUla, one of the most popular spots for visitors and photography.", image: "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/alula", source: "Visit Saudi", sustainabilityTips: ["تجنب تسلق التكوينات الصخرية أو العبث بها حفاظًا على طبيعتها.", "التزم بمناطق الجلوس المحددة لتقليل الضغط على البيئة الصحراوية.", "قلل الإضاءة والضوضاء غير الضرورية للحفاظ على هدوء الموقع."] },
+      { id: "alula_3", name: "AlUla Moments", nameEn: "AlUla Moments", type: "جديد", description: "سلسلة من الفعاليات والتجارب الحديثة في العلا، وتشمل مغامرات وفنون وتجارب موسمية فريدة.", descriptionEn: "A series of modern events and experiences in AlUla, including adventures, arts, and unique seasonal experiences.", image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/alula/events/alula-moments", source: "Visit Saudi", sustainabilityTips: ["اختر التجارب التي تراعي البيئة المحلية وتدعم المجتمع المحلي.", "استخدم الوسائل الرقمية للحجوزات والمعلومات بدل المطبوعات الورقية.", "احرص على تقليل النفايات أثناء حضور الفعاليات والأنشطة."] },
+      { id: "alula_4", name: "مهرجان سماء العلا", nameEn: "AlUla Skies Festival", type: "فعاليات", description: "فعالية مميزة تشتهر بتجارب المناطيد ومراقبة النجوم والأنشطة الليلية وسط طبيعة العلا.", descriptionEn: "A distinctive event famous for hot air balloon experiences, stargazing, and night activities in AlUla's nature.", image: "https://images.unsplash.com/photo-1532968961962-8a0cb3a2d4f5?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/alula/events/alula-skies-festival", source: "Visit Saudi", sustainabilityTips: ["حافظ على هدوء المكان لتقليل الإزعاج في البيئة الطبيعية الليلية.", "استخدم عبوات قابلة لإعادة الاستخدام أثناء حضور الفعاليات الخارجية.", "اتبع تعليمات المنظمين لحماية الموقع وتجربة الزوار."] }
+    ]
+  },
+  abha: {
+    cityAr: "أبها", cityEn: "Abha",
+    places: [
+      { id: "abha_1", name: "شارع الفن", nameEn: "Art Street", type: "مشهور", description: "من أشهر أماكن أبها ويتميز بالأجواء الفنية والمعارض والمقاهي والفعاليات الثقافية.", descriptionEn: "One of Abha's most famous places, known for its artistic atmosphere, galleries, cafes, and cultural events.", image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/aseer/attractions/art-street-in-abha", source: "Visit Saudi", sustainabilityTips: ["امشِ داخل المنطقة بدل التنقل القصير بالسيارة متى أمكن.", "حافظ على الأعمال الفنية والمرافق العامة ولا تعبث بها.", "ادعم المقاهي والمعارض المحلية للمساهمة في تنمية السياحة الثقافية."] },
+      { id: "abha_2", name: "رجال ألمع", nameEn: "Rijal Almaa", type: "تراث", description: "قرية تراثية شهيرة في منطقة عسير، معروفة بطرازها المعماري الفريد وتاريخها الثقافي الغني.", descriptionEn: "A famous heritage village in Aseer region, known for its unique architectural style and rich cultural history.", image: "https://images.unsplash.com/photo-1467269204594-9661b134dd2b?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/aseer/attractions/rijal-almaa-of-aseer", source: "Visit Saudi", sustainabilityTips: ["احترم الطابع التراثي للقرية وتجنب أي سلوك قد يضر بالمباني القديمة.", "اشترِ المنتجات المحلية والحرف اليدوية لدعم المجتمع المحلي.", "استخدم المياه باعتدال خاصة في المناطق الجبلية ذات الموارد المحدودة."] },
+      { id: "abha_3", name: "منتزه الحبلة", nameEn: "Al-Habala Park", type: "طبيعة", description: "من الوجهات الطبيعية المميزة في أبها، ويشتهر بالأجواء الجبلية والإطلالات الرائعة.", descriptionEn: "One of Abha's distinctive natural destinations, known for its mountain atmosphere and stunning views.", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/aseer/attractions/al-habala-park", source: "Visit Saudi", sustainabilityTips: ["ابقَ في المسارات المحددة لحماية النباتات والتربة الجبلية.", "لا تترك مخلفات الطعام أو العبوات في المناطق الطبيعية.", "استمتع بالطبيعة بهدوء وتجنب تشغيل الأصوات المرتفعة."] },
+      { id: "abha_4", name: "وجهات عسير الرائجة", nameEn: "Aseer Trending Destinations", type: "جديد", description: "مجموعة من الوجهات والأنشطة الرائجة حديثًا في عسير لمحبي الاستكشاف والطبيعة والمغامرة.", descriptionEn: "A collection of recently trending destinations and activities in Aseer for exploration, nature, and adventure lovers.", image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/aseer/stories/aseer-top-trending-places", source: "Visit Saudi", sustainabilityTips: ["اختر مزودي الخدمات الذين يدعمون الاستدامة والمنتجات المحلية.", "خطط لرحلتك مسبقًا لتقليل التنقل غير الضروري واستهلاك الوقود.", "احرص على ترك المكان كما كان دون أي أثر بيئي."] }
+    ]
+  },
+  taif: {
+    cityAr: "الطائف", cityEn: "Taif",
+    places: [
+      { id: "taif_1", name: "الهدا", nameEn: "Al-Hada", type: "طبيعة", description: "من أجمل مناطق الطائف الجبلية، وتشتهر بالمناظر الطبيعية والتلفريك والأجواء المعتدلة.", descriptionEn: "One of Taif's most beautiful mountain areas, known for scenic views, cable car, and moderate climate.", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/taif", source: "Visit Saudi", sustainabilityTips: ["التزم بمناطق الوقوف والمسارات المعتمدة لحماية البيئة الجبلية.", "لا ترمِ النفايات من المرتفعات أو الطرق الجبلية.", "قلل استهلاك الماء والموارد أثناء الجلسات والنزهات."] },
+      { id: "taif_2", name: "الكر السياحي", nameEn: "Al-Kar Tourism Area", type: "مشهور", description: "من الوجهات المعروفة في الطائف للعائلات والزوار، ويضم أنشطة وتجارب وترفيهًا متنوعًا.", descriptionEn: "A well-known Taif destination for families and visitors, featuring various activities and entertainment.", image: "https://images.unsplash.com/photo-1500835556837-99ac94a94552?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/taif", source: "Visit Saudi", sustainabilityTips: ["استخدم المرافق العامة بطريقة مسؤولة وتجنب الهدر في الماء والكهرباء.", "تخلص من النفايات في الأماكن المخصصة بعد الانتهاء من الزيارة.", "شجع أفراد المجموعة على احترام المكان والحفاظ على نظافته."] },
+      { id: "taif_3", name: "ممشى الطائف", nameEn: "Taif City Walk", type: "جديد", description: "واجهة حديثة ونشطة تضم مطاعم ومقاهي ومتاجر وفعاليات موسمية تناسب الزوار والعائلات.", descriptionEn: "A modern and vibrant promenade with restaurants, cafes, shops, and seasonal events for visitors and families.", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/taif/attractions/taif-city-walk", source: "Visit Saudi", sustainabilityTips: ["استفد من المشي كوسيلة تنقل مستدامة داخل الوجهة نفسها.", "اختر الأكواب والأدوات القابلة لإعادة الاستخدام من المقاهي القريبة.", "ساهم في إبقاء الممشى نظيفًا وآمنًا للجميع."] },
+      { id: "taif_4", name: "منتزه الردف", nameEn: "Arruddaf Park", type: "فعاليات", description: "من أشهر المتنزهات في الطائف ويتميز بالمساحات الخضراء والنافورات والأجواء العائلية.", descriptionEn: "One of Taif's most famous parks, featuring green spaces, fountains, and family-friendly atmosphere.", image: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/taif/attractions/arruddaf-park-in-taif", source: "Visit Saudi", sustainabilityTips: ["حافظ على المساحات الخضراء ولا تدس المزروعات أو تعبث بها.", "تجنب هدر المياه في دورات المياه والمرافق العامة.", "اجمع مخلفات النزهة كاملة قبل مغادرة المنتزه."] }
+    ]
+  },
+  khobar: {
+    cityAr: "الخبر", cityEn: "Khobar",
+    places: [
+      { id: "khobar_1", name: "واجهة الخبر البحرية", nameEn: "Khobar Seafront", type: "واجهة بحرية", description: "من أشهر معالم الخبر، مثالية للمشي والاسترخاء والاستمتاع بإطلالات البحر والأنشطة العائلية.", descriptionEn: "One of Khobar's most famous landmarks, ideal for walking, relaxing, enjoying sea views, and family activities.", image: "https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/eastern-province/attractions/khobar-seafront", source: "Visit Saudi", sustainabilityTips: ["حافظ على نظافة الواجهة البحرية والشاطئ بعد الانتهاء من الزيارة.", "تجنب رمي أي مواد قد تضر البيئة البحرية أو الطيور.", "استخدم عبوات متعددة الاستخدام لتقليل النفايات البلاستيكية."] },
+      { id: "khobar_2", name: "موسم الخبر", nameEn: "Khobar Season", type: "جديد", description: "فعاليات حديثة وتجارب موسمية على الواجهة البحرية تشمل الترفيه والثقافة والعروض.", descriptionEn: "Modern events and seasonal experiences on the seafront, featuring entertainment, culture, and shows.", image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/seasons/al-khobar-season", source: "Visit Saudi", sustainabilityTips: ["فضّل الحجز الإلكتروني والتذاكر الرقمية لتقليل الورق.", "شارك الرحلة مع العائلة أو الأصدقاء لتقليل الانبعاثات.", "التزم بإرشادات إعادة التدوير والنظافة داخل الفعاليات."] },
+      { id: "khobar_3", name: "متحف الطيبين", nameEn: "Taybeen Museum", type: "تراث", description: "متحف مميز في الخبر يعرض تفاصيل الحياة القديمة بلمسة تراثية ونوستالجية جذابة.", descriptionEn: "A distinctive Khobar museum displaying details of old life with a captivating heritage and nostalgic touch.", image: "https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/eastern-province/attractions/taybeen-museum", source: "Visit Saudi", sustainabilityTips: ["احترم المعروضات التراثية ولا تلمسها إلا إذا كان ذلك مسموحًا.", "ادعم السياحة الثقافية بشراء المنتجات المحلية من المتاجر المعتمدة.", "حافظ على هدوء المكان لتوفير تجربة أفضل للجميع."] },
+      { id: "khobar_4", name: "Khobar Breeze", nameEn: "Khobar Breeze", type: "فعاليات", description: "فعالية بحرية مميزة على الساحل الشرقي تجمع بين الإطلالات الجميلة والأنشطة الترفيهية.", descriptionEn: "A distinctive coastal event on the Eastern Coast combining beautiful views with entertainment activities.", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80", bookingUrl: "https://www.visitsaudi.com/en/eastern-province/events/khobar-breeze-festival", source: "Visit Saudi", sustainabilityTips: ["تجنب ترك أي مخلفات في المناطق الساحلية أو أماكن الجلوس.", "استخدم وسائل نقل جماعية عند حضور الفعالية إن أمكن.", "احرص على احترام البيئة البحرية وتقليل الضوضاء غير الضرورية."] }
+    ]
+  }
+};
+
+// Carbon data per city (hardcoded estimates in million tons CO₂)
+const carbonData = {
+  riyadh:  { lat: 24.688, lng: 46.722, co2: 7.2, color: "#ef4444", level: "vhigh" },
+  jeddah:  { lat: 21.485, lng: 39.193, co2: 5.1, color: "#f97316", level: "high" },
+  alula:   { lat: 26.613, lng: 37.921, co2: 0.8, color: "#22c55e", level: "low" },
+  abha:    { lat: 18.216, lng: 42.507, co2: 1.4, color: "#eab308", level: "med" },
+  taif:    { lat: 21.257, lng: 40.416, co2: 2.3, color: "#eab308", level: "med" },
+  khobar:  { lat: 26.217, lng: 50.198, co2: 3.8, color: "#f97316", level: "high" }
+};
+
+const cityAliases = {
+  "الرياض": "riyadh", "riyاض": "riyadh", "riyadh": "riyadh",
+  "جدة": "jeddah", "jeddah": "jeddah",
+  "العلا": "alula", "alula": "alula", "al ula": "alula",
+  "abha": "abha", "أبها": "abha",
+  "الطائف": "taif", "taif": "taif",
+  "الخبر": "khobar", "khobar": "khobar"
+};
+
+// ==================== STATE ====================
+let currentLang = "ar";
+let currentCityKey = null;
+let favorites = JSON.parse(localStorage.getItem("saudiTourFavorites") || "[]");
+let mapInitialized = false;
+
+// ==================== LANGUAGE ====================
+function applyLang(lang) {
+  currentLang = lang;
+  const t = translations[lang];
+  document.documentElement.lang = lang;
+  document.documentElement.dir = t.dir;
+
+  // Update all data-t elements
+  document.querySelectorAll("[data-t]").forEach(el => {
+    const key = el.getAttribute("data-t");
+    if (t[key] !== undefined) {
+      // Preserve fav-count-badge
+      const badge = el.querySelector(".fav-count-badge");
+      el.textContent = t[key];
+      if (badge) el.prepend(badge);
+    }
+  });
+  document.querySelectorAll("[data-t-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-t-placeholder");
+    if (t[key]) el.placeholder = t[key];
+  });
+
+  // Update filter options
+  const filterOpts = document.querySelectorAll("#typeFilter option[data-t]");
+  filterOpts.forEach(opt => {
+    const key = opt.getAttribute("data-t");
+    if (t[key]) opt.textContent = t[key];
+  });
+
+  // Active lang button
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.lang === lang);
+  });
+
+  // Re-render if city selected
+  if (currentCityKey) {
+    const city = tourismData[currentCityKey];
+    document.getElementById("resultsTitle").textContent =
+      lang === "ar" ? `أبرز الوجهات السياحية في ${city.cityAr}` : `Top Tourist Destinations in ${city.cityEn}`;
+    const n = city.places.length;
+    document.getElementById("resultsSubtitle").textContent =
+      (t.cityFound || "{n} places").replace("{n}", n);
+    renderPlaces(currentCityKey);
+  }
+  renderFavorites();
+}
+
+// ==================== TABS ====================
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("tab-" + tab).classList.add("active");
+
+    if (tab === "map" && !mapInitialized) {
+      setTimeout(initMap, 100);
+      mapInitialized = true;
+    }
+    if (tab === "favorites") renderFavorites();
+  });
+});
+
+// ==================== MAP ====================
+function initMap() {
+  const map = L.map("carbon-map", { center: [23.5, 44], zoom: 5, zoomControl: true });
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+    attribution: '© OpenStreetMap © CartoDB',
+    subdomains: "abcd", maxZoom: 19
+  }).addTo(map);
+
+  Object.entries(carbonData).forEach(([key, data]) => {
+    const city = tourismData[key];
+    const radius = 30000 + data.co2 * 18000;
+    const circle = L.circle([data.lat, data.lng], {
+      color: data.color, fillColor: data.color, fillOpacity: 0.35,
+      weight: 2, radius
+    }).addTo(map);
+
+    const barWidth = Math.round((data.co2 / 8) * 100);
+    circle.bindPopup(`
+      <div class="popup-city">${city.cityEn} / ${city.cityAr}</div>
+      <div class="popup-name">🌍 CO₂ Emissions</div>
+      <div class="popup-carbon">${data.co2} million tons CO₂/year</div>
+      <div class="popup-bar" style="background:linear-gradient(to right,${data.color},transparent);width:${barWidth}%"></div>
+    `);
+
+    L.marker([data.lat, data.lng], {
+      icon: L.divIcon({
+        className: "",
+        html: `<div style="background:${data.color};color:#fff;font-weight:800;font-family:Cairo,sans-serif;padding:5px 10px;border-radius:999px;font-size:0.78rem;border:2px solid rgba(255,255,255,0.3);white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,0.5)">${city.cityAr} · ${data.co2}Mt</div>`,
+        iconAnchor: [40, 10]
+      })
+    }).addTo(map);
+  });
+}
+
+// ==================== FAVORITES ====================
+function saveFavorites() {
+  localStorage.setItem("saudiTourFavorites", JSON.stringify(favorites));
+  updateFavBadge();
+}
+
+function updateFavBadge() {
+  const badge = document.getElementById("favBadge");
+  if (favorites.length > 0) {
+    badge.style.display = "inline-flex";
+    badge.textContent = favorites.length;
+  } else {
+    badge.style.display = "none";
+  }
+}
+
+function toggleFavorite(placeId) {
+  const idx = favorites.indexOf(placeId);
+  if (idx > -1) {
+    favorites.splice(idx, 1);
+  } else {
+    favorites.push(placeId);
+  }
+  saveFavorites();
+
+  // Update all fav buttons with this id
+  document.querySelectorAll(`.fav-btn[data-id="${placeId}"]`).forEach(btn => {
+    updateFavBtn(btn, favorites.includes(placeId));
+  });
+
+  // If on favorites tab, re-render
+  if (document.getElementById("tab-favorites").classList.contains("active")) {
+    renderFavorites();
+  }
+}
+
+function updateFavBtn(btn, isActive) {
+  const t = translations[currentLang];
+  btn.classList.toggle("active", isActive);
+  btn.textContent = isActive ? "❤️" : "🤍";
+  btn.title = isActive ? (t.removeFav || "Remove from favorites") : (t.addFav || "Add to favorites");
+}
+
+function getAllPlaces() {
+  const all = [];
+  Object.values(tourismData).forEach(city => {
+    city.places.forEach(place => all.push({ place, city }));
+  });
+  return all;
+}
+
+function renderFavorites() {
+  const grid = document.getElementById("favoritesGrid");
+  const empty = document.getElementById("favoritesEmpty");
+  grid.innerHTML = "";
+
+  const favPlaces = getAllPlaces().filter(({ place }) => favorites.includes(place.id));
+  if (favPlaces.length === 0) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+  favPlaces.forEach(({ place, city }) => {
+    grid.appendChild(createCard(place, city, false));
+  });
+}
+
+// ==================== CARDS ====================
+function createCard(place, city, showFavActive) {
+  const isFav = favorites.includes(place.id);
+  const t = translations[currentLang];
+  const isAr = currentLang === "ar";
+  const placeName = isAr ? place.name : (place.nameEn || place.name);
+  const placeDesc = isAr ? place.description : (place.descriptionEn || place.description);
+
+  const card = document.createElement("article");
+  card.className = "card";
+  card.innerHTML = `
+    <div class="card-image">
+      <img src="${place.image}" alt="${placeName}" loading="lazy">
+      <div class="card-overlay"></div>
+      <div class="card-tags">
+        <span class="badge city">${isAr ? city.cityAr : city.cityEn}</span>
+        <span class="badge type">${place.type}</span>
+      </div>
+      <button class="fav-btn ${isFav ? "active" : ""}" data-id="${place.id}" title="${isFav ? (t.removeFav || "") : (t.addFav || "")}">${isFav ? "❤️" : "🤍"}</button>
+    </div>
+    <div class="card-body">
+      <h3 class="card-title">${placeName}</h3>
+      <p class="card-description">${placeDesc}</p>
+      <div class="sustainability-box">
+        <h4>${t.sustainTitle || "🌱 Sustainability Tips"}</h4>
+        <ul class="sustainability-list">
+          ${place.sustainabilityTips.map(tip => `<li>${tip}</li>`).join("")}
+        </ul>
+      </div>
+      <div class="card-footer">
+        <a class="booking-link" href="${place.bookingUrl}" target="_blank" rel="noopener noreferrer">${t.bookNow || "Visit / Book"}</a>
+        <span class="source-note">${t.source || "Source"}: ${place.source}</span>
+      </div>
+    </div>
+  `;
+
+  card.querySelector(".fav-btn").addEventListener("click", (e) => {
+    e.preventDefault();
+    toggleFavorite(place.id);
+  });
+  return card;
+}
+
+function renderPlaces(cityKey) {
+  const selectedType = document.getElementById("typeFilter").value;
+  const city = tourismData[cityKey];
+  const t = translations[currentLang];
+  let places = city.places;
+  if (selectedType !== "all") places = places.filter(p => p.type === selectedType);
+
+  const results = document.getElementById("results");
+  const emptyState = document.getElementById("emptyState");
+  results.innerHTML = "";
+
+  if (!places.length) {
+    emptyState.classList.add("active");
+    emptyState.querySelector("h3").textContent = t.noResults || "No results";
+    emptyState.querySelector("p").textContent = t.noResultsHint || "";
+    return;
+  }
+  emptyState.classList.remove("active");
+  places.forEach(place => results.appendChild(createCard(place, city)));
+}
+
+function searchCity() {
+  const input = document.getElementById("cityInput").value;
+  const cityKey = cityAliases[input.trim().toLowerCase()] || null;
+  const t = translations[currentLang];
+
+  if (!cityKey) {
+    currentCityKey = null;
+    document.getElementById("results").innerHTML = "";
+    document.getElementById("resultsTitle").textContent = t.noCity || "City not supported";
+    document.getElementById("resultsSubtitle").textContent = t.noCityHint || "";
+    document.getElementById("emptyState").classList.add("active");
+    document.getElementById("emptyState").querySelector("h3").textContent = t.emptyTitle || "";
+    document.getElementById("emptyState").querySelector("p").textContent = t.emptyHint || "";
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    return;
+  }
+
+  currentCityKey = cityKey;
+  const city = tourismData[cityKey];
+  const isAr = currentLang === "ar";
+  document.getElementById("resultsTitle").textContent =
+    isAr ? `أبرز الوجهات السياحية في ${city.cityAr}` : `Top Tourist Destinations in ${city.cityEn}`;
+  document.getElementById("resultsSubtitle").textContent =
+    (t.cityFound || "{n} places found").replace("{n}", city.places.length);
+
+  document.querySelectorAll(".chip").forEach(c => {
+    c.classList.toggle("active", c.dataset.key === cityKey);
+  });
+  renderPlaces(cityKey);
+}
+
+// ==================== INIT ====================
+function init() {
+  const cityKeys = Object.keys(tourismData);
+  const chips = document.getElementById("cityChips");
+  cityKeys.forEach(key => {
+    const btn = document.createElement("button");
+    btn.className = "chip";
+    btn.dataset.key = key;
+    btn.textContent = tourismData[key].cityAr;
+    btn.addEventListener("click", () => {
+      document.getElementById("cityInput").value = tourismData[key].cityAr;
+      searchCity();
+    });
+    chips.appendChild(btn);
+  });
+
+  document.getElementById("searchBtn").addEventListener("click", searchCity);
+  document.getElementById("cityInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") searchCity();
+  });
+  document.getElementById("typeFilter").addEventListener("change", () => {
+    if (currentCityKey) renderPlaces(currentCityKey);
+  });
+
+  document.querySelectorAll(".lang-btn").forEach(btn => {
+    btn.addEventListener("click", () => applyLang(btn.dataset.lang));
+  });
+
+  const total = cityKeys.reduce((s, k) => s + tourismData[k].places.length, 0);
+  document.getElementById("placesCount").textContent = total;
+  document.getElementById("citiesCount").textContent = cityKeys.length;
+
+  updateFavBadge();
+  applyLang("ar");
+}
+
+init();
+</script>
+</body>
+</html>

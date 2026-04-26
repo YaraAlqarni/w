@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>مغامرة السياحة البيئية | Saudi Eco Adventure</title>
+    <meta name="description"
+        content="لعبة تفاعلية لاكتشاف مناطق السياحة البيئية في المملكة العربية السعودية مع تحليل أداء متكامل" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Animated Background -->
+    <div class="bg-anim"></div>
+    <div class="bg-grid"></div>
+
+    <!-- Audio — preload=auto buffers files on page load before IDM can intercept -->
+    <audio id="bg"   src="sounds/bg.mp3"   loop preload="auto"></audio>
+    <audio id="win"  src="sounds/win.mp3"       preload="auto"></audio>
+    <audio id="lose" src="sounds/lose.mp3"      preload="auto"></audio>
+
+    <!-- Answer Toast -->
+    <div id="answerToast"></div>
+
+    <!-- ════════════════════════════════════════
+     START SCREEN
+════════════════════════════════════════ -->
+    <div id="startScreen">
+        <div class="start-card">
+            <div class="game-logo">🌿</div>
+            <h1>مغامرة السياحة البيئية</h1>
+            <p class="start-subtitle">
+                اكتشف مناطق السعودية الطبيعية الرائعة، أجب على أسئلة الاستدامة<br>
+                واجمع أكبر عدد من النقاط البيئية!
+            </p>
+
+            <div class="input-wrap">
+                <span class="input-icon">✏️</span>
+                <input id="name" type="text" placeholder="أدخل اسمك هنا..." maxlength="24" autocomplete="off" />
+            </div>
+
+            <p class="avatar-label">اختر شخصيتك</p>
+            <div class="avatar-row">
+                <div class="avatar-wrap" id="wrapGirl" onclick="pick('girl', this)">
+                    <img src="images/girl.png" class="avatar" id="avatarGirl" alt="Girl character" />
+                    <span>مستكشفة</span>
+                </div>
+                <div class="avatar-wrap" id="wrapBoy" onclick="pick('boy', this)">
+                    <img src="images/boy.png" class="avatar" id="avatarBoy" alt="Boy character" />
+                    <span>مستكشف</span>
+                </div>
+            </div>
+
+            <button id="startBtn" onclick="startGame()">🚀 ابدأ المغامرة</button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+     HUD
+════════════════════════════════════════ -->
+    <div id="ui" class="hidden">
+        <div class="hud-card hud-player">
+            <img id="hudAvatar" class="hud-avatar" src="images/girl.png" alt="player" />
+            <span id="playerName">اللاعب</span>
+        </div>
+
+        <div class="hud-card hud-stats">
+            <div class="stat-item">
+                <span class="stat-label">النقاط</span>
+                <span class="stat-value" id="score">0</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="stat-item">
+                <span class="stat-label">الوقت</span>
+                <span class="stat-value" id="timer">300</span>
+            </div>
+            <div class="hud-divider"></div>
+            <div class="stat-item progress-wrap">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <span class="progress-text" id="progressText">0 / 14</span>
+            </div>
+        </div>
+
+        <button id="backBtn" onclick="window.location.href='../index.html'">← الرئيسية</button>
+    </div>
+
+    <!-- ════════════════════════════════════════
+     GAME AREA
+════════════════════════════════════════ -->
+    <div id="gameArea" class="hidden">
+
+        <!-- Player -->
+        <div id="player">
+            <img id="playerSprite" src="images/girl.png" alt="Player" />
+        </div>
+
+        <!-- Location tiles with labels -->
+        <div class="place" id="place0">
+            <img src="images/farasan.jpg" alt="جزر فرسان" />
+            <span class="place-label">جزر فرسان</span>
+        </div>
+        <div class="place" id="place1">
+            <img src="images/ahsa.jpg" alt="الأحساء" />
+            <span class="place-label">واحة الأحساء</span>
+        </div>
+        <div class="place" id="place2">
+            <img src="images/edge.jpg" alt="حافة العالم" />
+            <span class="place-label">حافة العالم</span>
+        </div>
+        <div class="place" id="place3">
+            <img src="images/ula.jpg" alt="العلا" />
+            <span class="place-label">العلا</span>
+        </div>
+
+        <div class="place" id="place4">
+            <img src="images/abhar.jpg" alt="شرم أبحر" />
+            <span class="place-label">شرم أبحر</span>
+        </div>
+        <div class="place" id="place5">
+            <img src="images/faifa.jpg" alt="فيفاء" />
+            <span class="place-label">جبل فيفاء</span>
+        </div>
+        <div class="place" id="place6">
+            <img src="images/shafa.jpg" alt="الشفا" />
+            <span class="place-label">الشفا</span>
+        </div>
+        <div class="place" id="place7">
+            <img src="images/greenmountain.jpg" alt="الجبل الأخضر" />
+            <span class="place-label">الجبل الأخضر</span>
+        </div>
+
+        <div class="place" id="place8">
+            <img src="images/asir.jpg" alt="عسير" />
+            <span class="place-label">منطقة عسير</span>
+        </div>
+        <div class="place" id="place9">
+            <img src="images/khuraim.jpg" alt="خريم" />
+            <span class="place-label">محمية خريم</span>
+        </div>
+        <div class="place" id="place10">
+            <img src="images/raghadan.jpg" alt="رغدان" />
+            <span class="place-label">غابة رغدان</span>
+        </div>
+        <div class="place" id="place11">
+            <img src="images/redsea.jpg" alt="البحر الأحمر" />
+            <span class="place-label">البحر الأحمر</span>
+        </div>
+
+        <div class="place" id="place12">
+            <img src="images/riyadhgreen.jpg" alt="الرياض الخضراء" />
+            <span class="place-label">الرياض الخضراء</span>
+        </div>
+        <div class="place" id="place13">
+            <img src="images/neom.jpg" alt="نيوم" />
+            <span class="place-label">نيوم</span>
+        </div>
+
+        <!-- Keyboard hint -->
+        <div id="gameInstructions">⬆️⬇️⬅️➡️ للتحرك &nbsp;|&nbsp; اقترب من المكان لفتح السؤال</div>
+
+        <!-- Mobile D-Pad -->
+        <div id="dpad">
+            <div class="dpad-grid">
+                <div class="dpad-empty"></div>
+                <button class="dpad-btn" id="dUp" aria-label="up">⬆️</button>
+                <div class="dpad-empty"></div>
+                <button class="dpad-btn" id="dLeft" aria-label="left">⬅️</button>
+                <div class="dpad-empty"></div>
+                <button class="dpad-btn" id="dRight" aria-label="right">➡️</button>
+                <div class="dpad-empty"></div>
+                <button class="dpad-btn" id="dDown" aria-label="down">⬇️</button>
+                <div class="dpad-empty"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════════
+     QUESTION MODAL
+════════════════════════════════════════ -->
+    <div id="qBox" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="q-card">
+            <div class="q-badge">
+                <span>🌿</span>
+                <span id="qBadgeText">سؤال بيئي</span>
+            </div>
+            <div class="q-location">
+                <span>📍</span>
+                <span id="qLocation">الموقع</span>
+            </div>
+            <h2 id="qText">نص السؤال</h2>
+            <div class="q-actions">
+                <button class="q-btn q-btn-true" onclick="answer(true)">✅ صحيح</button>
+                <button class="q-btn q-btn-false" onclick="answer(false)">❌ خطأ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+     END SCREEN + ANALYTICS DASHBOARD
+════════════════════════════════════════ -->
+    <div id="endScreen" class="hidden">
+        <div class="end-inner">
+
+            <!-- Hero Summary -->
+            <div class="end-hero">
+                <div class="end-emoji" id="endEmoji">🏆</div>
+                <div class="end-title">انتهت المغامرة البيئية!</div>
+                <div id="endPlayerLine" style="color:var(--muted);margin:6px 0;font-size:0.95rem;"></div>
+                <div class="rank-badge" id="rankBadge">🥉 مستكشف مبتدئ</div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon">⭐</div>
+                    <div class="kpi-value score-color" id="kpiScore">0</div>
+                    <div class="kpi-label">إجمالي النقاط</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">✅</div>
+                    <div class="kpi-value" id="kpiCorrect">0</div>
+                    <div class="kpi-label">إجابات صحيحة</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">❌</div>
+                    <div class="kpi-value wrong-color" id="kpiWrong">0</div>
+                    <div class="kpi-label">إجابات خاطئة</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">⏱️</div>
+                    <div class="kpi-value time-color" id="kpiTime">0ث</div>
+                    <div class="kpi-label">الوقت المستغرق</div>
+                </div>
+            </div>
+
+            <!-- Row 1: Bar Chart + Accuracy Ring -->
+            <div class="analytics-row">
+
+                <!-- Bar Chart -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <div class="panel-title-dot"></div>
+                        الأداء لكل سؤال
+                    </div>
+                    <div class="bar-chart" id="barChart"></div>
+                    <div style="display:flex;gap:14px;margin-top:10px;font-size:0.72rem;color:var(--muted);">
+                        <span style="display:flex;align-items:center;gap:5px;"><span
+                                style="width:10px;height:10px;border-radius:2px;background:var(--success);display:inline-block"></span>صحيح
+                            (+10)</span>
+                        <span style="display:flex;align-items:center;gap:5px;"><span
+                                style="width:10px;height:10px;border-radius:2px;background:var(--danger);display:inline-block"></span>خطأ
+                            (-5)</span>
+                    </div>
+                </div>
+
+                <!-- Accuracy Ring -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <div class="panel-title-dot" style="background:var(--secondary)"></div>
+                        دقة الإجابات
+                    </div>
+                    <div class="accuracy-panel">
+                        <div class="ring-wrap">
+                            <svg class="ring-svg" viewBox="0 0 100 100">
+                                <defs>
+                                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#2dd4bf" />
+                                        <stop offset="100%" stop-color="#60a5fa" />
+                                    </linearGradient>
+                                </defs>
+                                <circle class="ring-bg-track" cx="50" cy="50" r="40" />
+                                <circle class="ring-fill" id="ringFill" cx="50" cy="50" r="40" />
+                            </svg>
+                            <div class="ring-center-text">
+                                <span class="ring-pct" id="ringPct">0%</span>
+                                <span class="ring-sub">دقة</span>
+                            </div>
+                        </div>
+                        <div class="accuracy-stats">
+                            <div class="acc-row">
+                                <span class="acc-key">الصحيح</span>
+                                <span class="acc-val green" id="accCorrect">0</span>
+                            </div>
+                            <div class="acc-row">
+                                <span class="acc-key">الخطأ</span>
+                                <span class="acc-val red" id="accWrong">0</span>
+                            </div>
+                            <div class="acc-row">
+                                <span class="acc-key">أعلى سلسلة</span>
+                                <span class="acc-val blue" id="accStreak">0</span>
+                            </div>
+                            <div class="acc-row">
+                                <span class="acc-key">المعدل/سؤال</span>
+                                <span class="acc-val" id="accAvg">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 2: Eco Meter + Heatmap + Leaderboard -->
+            <div class="analytics-row-3">
+
+                <!-- Eco Impact Meter -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <div class="panel-title-dot" style="background:var(--success)"></div>
+                        🌱 الأثر البيئي
+                    </div>
+                    <div class="eco-meter-value" id="ecoValue">0</div>
+                    <div class="eco-meter-unit">كغم CO₂ تم تفاديه</div>
+                    <div class="eco-bar-bg">
+                        <div class="eco-bar-fill" id="ecoBar"></div>
+                    </div>
+                    <div class="eco-tier-row">
+                        <span>🌱 مبتدئ</span>
+                        <span>🌿 متوسط</span>
+                        <span>🌳 خبير</span>
+                    </div>
+                    <p style="font-size:0.75rem;color:var(--muted);margin-top:14px;line-height:1.7;text-align:center;">
+                        كل إجابة صحيحة تعادل تجنب 8.5 كغم CO₂ من الانبعاثات السياحية
+                    </p>
+                </div>
+
+                <!-- City Knowledge Heatmap -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <div class="panel-title-dot" style="background:var(--gold)"></div>
+                        🗺️ خريطة المعرفة
+                    </div>
+                    <div class="heatmap-grid" id="heatmapGrid"></div>
+                </div>
+
+                <!-- Leaderboard -->
+                <div class="panel">
+                    <div class="panel-title">
+                        <div class="panel-title-dot" style="background:var(--gold)"></div>
+                        🏆 لوحة المتصدرين
+                    </div>
+                    <div id="leaderboardList"></div>
+                </div>
+
+            </div>
+
+            <!-- End Actions -->
+            <div class="end-actions">
+                <button class="btn-replay" onclick="location.reload()">🔄 العب مجددًا</button>
+                <button class="btn-home" onclick="window.location.href='../index.html'">🏠 الصفحة الرئيسية</button>
+            </div>
+
+        </div><!-- /.end-inner -->
+    </div><!-- /#endScreen -->
+
+    <script src="script.js"></script>
+</body>
+
+</html>
